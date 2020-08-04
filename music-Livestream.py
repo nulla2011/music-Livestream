@@ -167,6 +167,9 @@ def main(argv):
             continue
         print(ffmpegcmd)
         fileList.clear()  #清空列表准备下次写入
+        if not (rtmp.startswith('rtmp')):
+            with open("current_command.bat", 'w') as f:
+                f.write(ffmpegcmd)
         try:
             os.system(ffmpegcmd)
         except Exception:
