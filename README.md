@@ -1,1 +1,1 @@
-Randomly stream your music.
+Randomly stream your music from your library.

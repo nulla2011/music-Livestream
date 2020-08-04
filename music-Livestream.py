@@ -20,61 +20,64 @@ infofont = conf.get('fonts', 'infofont')
 maxlength = 7 * 60 + 15
 fileList = []
 
+
 def getMusicFile(path):
     currentList = os.listdir(path)
     for eachF in currentList:
         tempPath = path + '/' + eachF
         if os.path.isfile(tempPath):
-            if (tempPath.find('.flac') != -1):
+            if eachF.endswith('.flac'):
                 fileList.append([tempPath, 'flac'])
-            elif (tempPath.find('.mp3') != -1):
+            elif eachF.endswith('.mp3'):
                 fileList.append([tempPath, 'mp3'])
-            elif (tempPath.find('.m4a') != -1):
+            elif eachF.endswith('.m4a'):
                 fileList.append([tempPath, 'm4a'])
             else:
                 continue
         else:
             getMusicFile(tempPath)
 
+
 def getVideoFile(path):
     currentList = os.listdir(path)
     for eachF in currentList:
         tempPath = path + '/' + eachF
         if os.path.isfile(tempPath):
-            if (tempPath.find('.flv') != -1):
+            if eachF.endswith('.flv'):
                 fileList.append([tempPath, 'flv'])
-            elif (tempPath.find('.mp4') != -1):
+            elif eachF.endswith('.mp4'):
                 fileList.append([tempPath, 'mp4'])
             else:
                 continue
         else:
             getVideoFile(tempPath)
 
+
 def main(argv):
     while True:
         global fileList
-        if argv[1]=="music":
+        if argv[1] == "music":
             getMusicFile(musicpath)
-        elif argv[1]=="video":
+        elif argv[1] == "video":
             pass
             #getVideoFile(videopath)
-        elif argv[1]=="-s":
-            if len(argv)<3:
+        elif argv[1] == "-s":
+            if len(argv) < 3:
                 print("param ERROR!")
                 return -1
             else:
                 getMusicFile(musicpath)
                 #getVideoFile(videopath)
-                resultList=[]
+                resultList = []
                 for f in fileList:
-                    if (f[0].find(argv[2])!=-1):
+                    if (f[0].find(argv[2]) != -1):
                         resultList.append(f)
-                if len(resultList)==0:
+                if len(resultList) == 0:
                     print("not fond!")
                     return -1
                 else:
                     fileList.clear()
-                    fileList=resultList.copy()                  
+                    fileList = resultList.copy()
         else:
             getMusicFile(musicpath)
             getVideoFile(videopath)
@@ -90,9 +93,9 @@ def main(argv):
             audio = FLAC(fileList[ran][0])
             for meta in audio.tags:
                 if (meta[0] == 'TITLE' or meta[0] == 'Title'):
-                    title = meta[1].replace('\x00', '') #部分结尾有谜之字符
+                    title = meta[1].replace('\x00', '')  #部分结尾有谜之字符
                 if (meta[0] == 'ARTIST' or meta[0] == 'Artist'):
-                    artistList.append(meta[1].replace('\x00', '')) #部分结尾有谜之字符
+                    artistList.append(meta[1].replace('\x00', ''))  #部分结尾有谜之字符
             artist = "/".join(artistList)
             musicLength = audio.info.length
             if musicLength > maxlength:
@@ -163,7 +166,7 @@ def main(argv):
             print("command ERROR!")
             continue
         print(ffmpegcmd)
-        fileList.clear() #清空列表准备下次写入
+        fileList.clear()  #清空列表准备下次写入
         try:
             os.system(ffmpegcmd)
         except Exception:
