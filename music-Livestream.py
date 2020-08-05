@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 import sys
 import random
@@ -10,7 +11,7 @@ from mutagen.id3 import ID3
 
 conf = configparser.ConfigParser()
 try:
-    conf.read("music-livestream.ini")
+    conf.read("music-Livestream.ini")
     rtmp = conf.get('main', 'rtmp_url')
     musicpath = conf.get('main', 'musicpath')
     videopath = conf.get('main', 'videopath')
@@ -128,8 +129,7 @@ def main(argv):
                     if (meta[0] == 'TITLE' or meta[0] == 'Title'):
                         title = meta[1].replace('\x00', '')  #部分结尾有谜之字符
                     if (meta[0] == 'ARTIST' or meta[0] == 'Artist'):
-                        artistList.append(meta[1].replace('\x00',
-                                                          ''))  #部分结尾有谜之字符
+                        artistList.append(meta[1].replace('\x00', ''))  #部分结尾有谜之字符
                 artist = "/".join(artistList)
                 musicLength = audio.info.length
                 if musicLength > maxlength:
@@ -159,12 +159,12 @@ def main(argv):
             try:
                 ffmpegcmd = (
                     "ffmpeg -y -threads 0 -re -i \"" + fileList[ran][0] +
-                    "\" -f lavfi -i color=size=1280x720:rate=15:color=random:d="
-                    + str(musicLength) +
+                    "\" -f lavfi -i color=size=1280x720:rate=15:color=random:d=" +
+                    str(musicLength) +
                     " -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"
-                    " drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\:%S}\':r=30:x=(w-tw)/2:y=(h-th)/2+h/8:fontsize=45:fontcolor="
-                    + timercolor +
-                    ":shadowcolor=0x482123ED:shadowx=2:shadowy=2,"
+                    #for linux
+                    " drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\\\\\\:%S}\':r=30:x=(w-tw)/2:y=(h-th)/2+h/8:fontsize=45:fontcolor="  
+                    + timercolor + ":shadowcolor=0x482123ED:shadowx=2:shadowy=2,"
                     " drawtext=fontfile=" + globalfont +
                     ":text=*不支持点歌*:x=(w-tw)/2:y=h/25:fontsize=48:fontcolor=0xF84031:borderw=2:bordercolor=0xFDF1F6DD,"
                     " drawtext=fontfile=" + globalfont +
@@ -175,42 +175,41 @@ def main(argv):
                 if title != "" and artist != "":  #信息非空
                     if len(title) + len(artist) > 33:  #文字超长
                         ffmpegcmd += (
-                            " drawtext=fontfile=" + infofont + ":text=\'" +
-                            title +
+                            " drawtext=fontfile=" + infofont + ":text=\'" + title +
                             "\':x=(w-tw)/2:y=h/3:fontsize=32:fontcolor=" +
                             infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,"
                             " drawtext=fontfile=" + infofont + ":text=\'" +
                             artist +
-                            "\':x=(w-tw)/2:y=h/3+th*1.8:fontsize=32:fontcolor="
-                            + infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,")
+                            "\':x=(w-tw)/2:y=h/3+th*1.8:fontsize=32:fontcolor=" +
+                            infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,")
                     else:
                         ffmpegcmd += (
-                            " drawtext=fontfile=" + infofont + ":text=\'" +
-                            title + " - " + artist +
+                            " drawtext=fontfile=" + infofont + ":text=\'" + title +
+                            " - " + artist +
                             "\':x=(w-tw)/2:y=h/3:fontsize=32:fontcolor=" +
                             infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,")
                 ffmpegcmd += " drawtext=fontfile=" + globalfont + ":text=\'%{localtime}\':x=w*8/10:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
                 if fileList[ran][1] == 'm4a':  #m4a直接拷贝音频流
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec copy -bufsize 1000k -preset ultrafast -f flv "
-                        + rtmp)
+                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
+                        + rtmp + "\"")
                 else:
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv "
-                        + rtmp)
+                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
+                        + rtmp + "\"")
             except Exception:
                 print("command ERROR!")
                 continue
         elif ftype(fileList[ran][1]) == 2:  #flv/MP4视频直接推，没什么好说的
             ffmpegcmd = ("ffmpeg -y -threads 0 -re -i \"" + fileList[ran][0] +
-                         "\" -codec copy -bufsize 1000k -f flv " + rtmp)
+                        "\" -codec copy -bufsize 1000k -f flv \"" + rtmp + "\"")
         else:
             print("type ERROR")
             continue
         print(ffmpegcmd)
         fileList.clear()  #清空列表准备下次写入
         if not (rtmp.startswith('rtmp')):
-            with open("current_command.bat", 'w') as f:
+            with open("current_command.sh", 'w', encoding='utf-8') as f:
                 f.write(ffmpegcmd)
         try:
             os.system(ffmpegcmd)
