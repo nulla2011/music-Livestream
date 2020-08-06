@@ -3,20 +3,20 @@ import os
 import sys
 import random
 import configparser
-from configparser import Error
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
 from mutagen.id3 import ID3
 import ffmpegcmd
+import reverseBackslash
 
 conf = configparser.ConfigParser()
 try:
     conf.read("music-Livestream.ini")
     rtmp = conf.get('main', 'rtmp_url')
-    musicpath = conf.get('main', 'musicpath')
-    videopath = conf.get('main', 'videopath')
-    bgvPath = conf.get('main', 'bgvPath')
+    musicpath = reverseBackslash.reverseB(conf.get('main', 'musicpath').lower())
+    videopath = reverseBackslash.reverseB(conf.get('main', 'videopath').lower())
+    bgvPath = reverseBackslash.reverseB(conf.get('main', 'bgvPath').lower())
     timercolor = conf.get('colors', 'timercolor')
     infocolor = conf.get('colors', 'infocolor')
     globalfont = conf.get('fonts', 'globalfont')
@@ -32,6 +32,60 @@ maxlength = 7 * 60 + 15
 fileList = []
 
 
+class Musicinfo:
+    def __init__(self, Path):
+        self.path = Path
+        self.mtype = (os.path.splitext(Path)[1])[1:]
+
+    def Length(self):
+        if self.mtype == "mp3":
+            audio = MP3(self.path)
+        elif self.mtype == "flac":
+            audio = FLAC(self.path)
+        elif self.mtype == "m4a":
+            audio = MP4(self.path)
+        else:
+            print("file type not support!")
+            return -1
+        return audio.info.length
+
+    def artist(self):
+        if self.mtype == "mp3":
+            audio = ID3(self.path)
+            return audio['TPE1'].text[0]
+        elif self.mtype == "flac":
+            artistList = []
+            audio = FLAC(self.path)
+            for tag in audio.tags:
+                if (tag[0] == 'ARTIST' or tag[0] == 'Artist'):
+                    artistList.append(tag[1].replace('\x00', ''))  #部分结尾有谜之字符
+            return ("/".join(artistList))
+        elif self.mtype == "m4a":
+            audio = MP4(self.path)
+            return audio.tags['\xa9ART'][0]
+
+    def title(self):
+        if self.mtype == "mp3":
+            audio = ID3(self.path)
+            return audio["TIT2"].text[0]
+        elif self.mtype == "flac":
+            audio = FLAC(self.path)
+            for tag in audio.tags:
+                if (tag[0] == 'TITLE' or tag[0] == 'Title'):
+                    return tag[1].replace('\x00', '')  #部分结尾有谜之字符
+        elif self.mtype == "m4a":
+            audio = MP4(self.path)
+            return audio.tags['\xa9nam'][0]
+
+
+'''
+def ext(path):
+    name=path.split('/')[-1]
+    extension=name.split('.')[-1]
+    return extension
+'''
+
+
 def getMusicFile(path):
     try:
         currentList = os.listdir(path)
@@ -39,14 +93,14 @@ def getMusicFile(path):
         print("path not found,please check music-Livestream.ini")
         sys.exit(0)
     for eachF in currentList:
-        tempPath = path + '/' + eachF
+        tempPath = path + '/' + eachF.lower()
         if os.path.isfile(tempPath):
             if eachF.endswith('.flac'):
-                fileList.append([tempPath, 'flac'])
+                fileList.append(tempPath)
             elif eachF.endswith('.mp3'):
-                fileList.append([tempPath, 'mp3'])
+                fileList.append(tempPath)
             elif eachF.endswith('.m4a'):
-                fileList.append([tempPath, 'm4a'])
+                fileList.append(tempPath)
             else:
                 continue
         else:
@@ -60,12 +114,12 @@ def getVideoFile(path):
         print("path not found,please check music-Livestream.ini")
         sys.exit(0)
     for eachF in currentList:
-        tempPath = path + '/' + eachF
+        tempPath = path + '/' + eachF.lower()
         if os.path.isfile(tempPath):
             if eachF.endswith('.flv'):
-                fileList.append([tempPath, 'flv'])
+                fileList.append(tempPath)
             elif eachF.endswith('.mp4'):
-                fileList.append([tempPath, 'mp4'])
+                fileList.append(tempPath)
             else:  #不存mkv格式的短视频，所以不考虑mkv；ts仅用于生放，所以也不考虑ts
                 continue
         else:
@@ -121,52 +175,29 @@ def main(argv):
         except ValueError:
             print("no file fond")
             continue
-        currentFilePath = fileList[ran][0]
-        currentFileType = fileList[ran][1]
+        currentFilePath = fileList[ran]
+        currentFileType = (os.path.splitext(fileList[ran])[1])[1:]
         if ftype(currentFileType) == 1:
-            title = ""
-            artist = ""
-            artistList = []
-            if currentFileType == 'flac':
-                audio = FLAC(currentFilePath)
-                for meta in audio.tags:
-                    if (meta[0] == 'TITLE' or meta[0] == 'Title'):
-                        title = meta[1].replace('\x00', '')  #部分结尾有谜之字符
-                    if (meta[0] == 'ARTIST' or meta[0] == 'Artist'):
-                        artistList.append(meta[1].replace('\x00',
-                                                          ''))  #部分结尾有谜之字符
-                artist = "/".join(artistList)
-                musicLength = audio.info.length
-                if musicLength > maxlength:
-                    print("too long")
-                    continue
-            elif currentFileType == 'mp3':
-                audio = MP3(currentFilePath)
-                musicLength = audio.info.length
-                if musicLength > maxlength:
-                    print("too long")
-                    continue
-                else:
-                    audio = ID3(currentFilePath)
-                    artist = audio['TPE1'].text[0]
-                    title = audio["TIT2"].text[0]
-            elif currentFileType == 'm4a':
-                audio = MP4(currentFilePath)
-                musicLength = audio.info.length
-                if musicLength > maxlength:
-                    print("too long")
-                    continue
-                else:
-                    title = audio.tags['\xa9nam'][0]
-                    artist = audio.tags['\xa9ART'][0]
-            else:
+            M = Musicinfo(currentFilePath)
+            musicLength = M.Length()
+            if musicLength > maxlength:
+                print("too long")
                 continue
+            if musicLength < 0:
+                print("too short or file type ERROR")
+                continue
+            title = M.title()
+            artist = M.artist()
             #audio only
             # 2 currentfile, mLength, bgv, 2 color, 2 font, info, output
-            cmd = ffmpegcmd.createffmpegcmd(currentFilePath, currentFileType,
+            try:
+                cmd = ffmpegcmd.createffmpegcmd(currentFilePath, currentFileType,
                                             musicLength, bgvPath, timercolor,
                                             infocolor, globalfont, infofont,
                                             title, artist, rtmp)
+            except Exception:
+                print("command ERROR!")
+                continue
         elif ftype(currentFileType) == 2:  #flv/MP4视频直接推，没什么好说的
             cmd = ("ffmpeg -y -threads 0 -re -i \"" + currentFilePath +
                    "\" -codec copy -bufsize 1000k -f flv \"" + rtmp + "\"")
@@ -174,7 +205,7 @@ def main(argv):
             print("type ERROR")
             continue
         print(cmd)
-        fileList.clear()  #清空列表准备下次写入
+        fileList.clear()  #清空列表准备下次写入       
         if not (rtmp.startswith('rtmp')):
             with open("current_command.sh", 'w', encoding='utf-8') as f:
                 f.write(cmd)
