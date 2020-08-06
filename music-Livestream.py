@@ -15,6 +15,7 @@ try:
     rtmp = conf.get('main', 'rtmp_url')
     musicpath = conf.get('main', 'musicpath')
     videopath = conf.get('main', 'videopath')
+    bgvPath=conf.get('main', 'bgvPath')
     timercolor = conf.get('colors', 'timercolor')
     infocolor = conf.get('colors', 'infocolor')
     globalfont = conf.get('fonts', 'globalfont')
@@ -157,45 +158,47 @@ def main(argv):
             else:
                 continue
             try:
+                startt=random.randint(0,8*60-int(musicLength))
                 ffmpegcmd = (
                     "ffmpeg -y -threads 0 -re -i \"" + fileList[ran][0] +
-                    "\" -f lavfi -i color=size=1280x720:rate=15:color=random:d=" +
+                    "\" -ss "+str(startt)+" -i \"" +bgvPath+"\" -t "+
                     str(musicLength) +
-                    " -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"
+                    #" -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"
                     #for linux
-                    " drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\\\\\\:%S}\':r=30:x=(w-tw)/2:y=(h-th)/2+h/8:fontsize=45:fontcolor="  
+                    " -vf \"drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/8*5+h/8:fontsize=45:fontcolor="  
                     + timercolor + ":shadowcolor=0x482123ED:shadowx=2:shadowy=2,"
                     " drawtext=fontfile=" + globalfont +
                     ":text=*不支持点歌*:x=(w-tw)/2:y=h/25:fontsize=48:fontcolor=0xF84031:borderw=2:bordercolor=0xFDF1F6DD,"
+                    " drawtext=fontfile=" + globalfont +":text=\'•\\\v•\\\v•\\\v•\':x=w/10:y=h/8:fontsize=32:fontcolor=white,"
                     " drawtext=fontfile=" + globalfont +
-                    ":text=\'todo\\:背景，切歌不断流\':x=(w-tw)/3:y=(h-th)/12*11:fontsize=30:fontcolor=0xDDDDDD,"
+                    ":text=\'todo\\:切歌不断流\':x=w/7:y=(h-th)/12*11:fontsize=30:fontcolor=0xDDDDDD,"
                     " drawtext=fontfile=" + globalfont +
-                    ":text=試\\\v試\\\v竖\\\v排:x=w/13*12:y=h/2:fontsize=40:fontcolor=0xAFAFAF,"
+                    ":text=試\\\v試\\\v竖\\\v排:x=w/13*12:y=h/4:fontsize=40:fontcolor=0xAFAFAF,"
                 )
                 if title != "" and artist != "":  #信息非空
                     if len(title) + len(artist) > 33:  #文字超长
                         ffmpegcmd += (
                             " drawtext=fontfile=" + infofont + ":text=\'" + title +
-                            "\':x=(w-tw)/2:y=h/3:fontsize=32:fontcolor=" +
+                            "\':x=(w-tw)/2:y=h/7*4:fontsize=32:fontcolor=" +
                             infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,"
                             " drawtext=fontfile=" + infofont + ":text=\'" +
                             artist +
-                            "\':x=(w-tw)/2:y=h/3+th*1.8:fontsize=32:fontcolor=" +
+                            "\':x=(w-tw)/2:y=h/7*4+th*1.8:fontsize=32:fontcolor=" +
                             infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,")
                     else:
                         ffmpegcmd += (
                             " drawtext=fontfile=" + infofont + ":text=\'" + title +
                             " - " + artist +
-                            "\':x=(w-tw)/2:y=h/3:fontsize=32:fontcolor=" +
+                            "\':x=(w-tw)/2:y=h/7*4:fontsize=32:fontcolor=" +
                             infocolor + ":borderw=2:bordercolor=0xFDF1F6DD,")
                 ffmpegcmd += " drawtext=fontfile=" + globalfont + ":text=\'%{localtime}\':x=w*8/10:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
                 if fileList[ran][1] == 'm4a':  #m4a直接拷贝音频流
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
+                        " -vcodec libx264 -g 500 -b:v 500k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
                         + rtmp + "\"")
                 else:
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 30 -maxrate 2500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
+                        " -vcodec libx264 -g 500 -b:v 500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
                         + rtmp + "\"")
             except Exception:
                 print("command ERROR!")
