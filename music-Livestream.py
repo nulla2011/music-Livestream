@@ -194,11 +194,11 @@ def main(argv):
                 ffmpegcmd += " drawtext=fontfile=" + globalfont + ":text=\'%{localtime}\':x=w*8/10:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
                 if fileList[ran][1] == 'm4a':  #m4a直接拷贝音频流
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 500 -b:v 500k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
+                        " -vcodec libx264 -g 50 -b:v 500k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
                         + rtmp + "\"")
                 else:
                     ffmpegcmd += (
-                        " -vcodec libx264 -g 500 -b:v 500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
+                        " -vcodec libx264 -g 50 -b:v 500k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
                         + rtmp + "\"")
             except Exception:
                 print("command ERROR!")
