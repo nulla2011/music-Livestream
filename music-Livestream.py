@@ -14,9 +14,9 @@ conf = configparser.ConfigParser()
 try:
     conf.read("music-Livestream.ini")
     rtmp = conf.get('main', 'rtmp_url')
-    musicpath = reverseBackslash.reverseB(conf.get('main', 'musicpath').lower())
-    videopath = reverseBackslash.reverseB(conf.get('main', 'videopath').lower())
-    bgvPath = reverseBackslash.reverseB(conf.get('main', 'bgvPath').lower())
+    musicpath = reverseBackslash.reverseB(conf.get('main', 'musicpath'))
+    videopath = reverseBackslash.reverseB(conf.get('main', 'videopath'))
+    bgvPath = reverseBackslash.reverseB(conf.get('main', 'bgvPath'))
     timercolor = conf.get('colors', 'timercolor')
     infocolor = conf.get('colors', 'infocolor')
     globalfont = conf.get('fonts', 'globalfont')
@@ -93,13 +93,13 @@ def getMusicFile(path):
         print("path not found,please check music-Livestream.ini")
         sys.exit(0)
     for eachF in currentList:
-        tempPath = path + '/' + eachF.lower()
+        tempPath = path + '/' + eachF
         if os.path.isfile(tempPath):
-            if eachF.endswith('.flac'):
+            if eachF.lower().endswith('.flac'):
                 fileList.append(tempPath)
-            elif eachF.endswith('.mp3'):
+            elif eachF.lower().endswith('.mp3'):
                 fileList.append(tempPath)
-            elif eachF.endswith('.m4a'):
+            elif eachF.lower().endswith('.m4a'):
                 fileList.append(tempPath)
             else:
                 continue
@@ -114,11 +114,11 @@ def getVideoFile(path):
         print("path not found,please check music-Livestream.ini")
         sys.exit(0)
     for eachF in currentList:
-        tempPath = path + '/' + eachF.lower()
+        tempPath = path + '/' + eachF
         if os.path.isfile(tempPath):
-            if eachF.endswith('.flv'):
+            if eachF.lower().endswith('.flv'):
                 fileList.append(tempPath)
-            elif eachF.endswith('.mp4'):
+            elif eachF.lower().endswith('.mp4'):
                 fileList.append(tempPath)
             else:  #不存mkv格式的短视频，所以不考虑mkv；ts仅用于生放，所以也不考虑ts
                 continue
