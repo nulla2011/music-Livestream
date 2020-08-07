@@ -2,27 +2,34 @@
 import random
 
 
-def createffmpegcmd(filePath, fileType, musicLength, bgvPath, timerColor,
-                    infoColor, globalFont, infoFont, title, artist, rtmp):
+def createffmpegcmd(filePath, fileType, musicLength, offset, bgvPath,
+                    timerColor, infoColor, globalFont, infoFont, title, artist,
+                    rtmp):
     startt = random.randint(0, 8 * 60 - int(musicLength))
+    if int(offset) < 10:
+        offsetstr = '0' + offset
+    else:
+        offsetstr = offset
     cmdstring = (
-        "ffmpeg -y -threads 0 -re -i \"" + filePath + "\" -ss " + str(startt) +
-        " -i \"" + bgvPath + "\" -t " + str(musicLength) +
+        "ffmpeg -y -threads 0 -re -itsoffset 00:00:" + offsetstr + " -i \"" +
+        filePath + "\" -ss " + str(startt) + " -i \"" + bgvPath + "\" -t " +
+        str(musicLength + int(offset)) +
         #" -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"
         #播放时间
         #for linux,it is 10 backslashs before %S; for windows, is 5
-        " -vf \"drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3:fontsize=45:fontcolor="
-        + timerColor + ":shadowcolor=0xFDF1F6DD:shadowx=2:shadowy=2,"
+        " -vf \"drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3:fontfile="
+        + globalFont + ":fontsize=45:fontcolor=" + timerColor +
+        ":shadowcolor=0xFDF1F6DD:shadowx=2:shadowy=2,"
         #上方注意
         " drawtext=fontfile=" + globalFont +
         ":text=*不支持点歌*:x=(w-tw)/2:y=h/25:fontsize=48:fontcolor=0xF84031:borderw=2:bordercolor=0xFDF1F6DD,"
         #左上说明
         " drawtext=fontfile=" + globalFont +
-        ":text=\'\• 使用vps+自制程序随机播放库中的音乐\':x=w/14:y=h/7:fontsize=32:fontcolor=white,"
+        ":text=\'\• 使用vps+自制程序随机播放库中的音乐\':x=w/14:y=h/7:fontsize=32:fontcolor=0xFFFFFFBB,"
         " drawtext=fontfile=" + globalFont +
-        ":text=\'\• 几年前的歌曲库了，正在准备整理好传新歌\':x=w/14:y=h/7+th*1.5:fontsize=32:fontcolor=white,"
+        ":text=\'\• 几年前的歌曲库了，正在准备整理传新歌\':x=w/14:y=h/7+th*1.5:fontsize=32:fontcolor=0xFFFFFFBB,"
         " drawtext=fontfile=" + globalFont +
-        ":text=\'\• 不支持点歌，因为没bu流hui量xie\':x=w/14:y=h/7+th*1.5*2:fontsize=32:fontcolor=white,"
+        ":text=\'\• 不支持点歌，因为没bu流hui量xie\':x=w/14:y=h/7+th*1.5*2:fontsize=32:fontcolor=0xFFFFFFBB,"
         #左下todo
         " drawtext=fontfile=" + globalFont +
         ":text=\'todo\\:切歌不断流\':x=w/7:y=(h-th)/12*11:fontsize=30:fontcolor=0xDDDDDD,"
@@ -38,7 +45,7 @@ def createffmpegcmd(filePath, fileType, musicLength, bgvPath, timerColor,
                 "\':x=(w-tw)/2:y=h/19*10:fontsize=40:fontcolor=" + infoColor +
                 ":borderw=2:bordercolor=0xFDF1F6DD,"
                 " drawtext=fontfile=" + infoFont + ":text=\'" + artist +
-                "\':x=(w-tw)/2:y=h/19*10+th*1.8:fontsize=32:fontcolor=" +
+                "\':x=(w-tw)/2:y=h/19*10+th*2:fontsize=32:fontcolor=" +
                 infoColor + ":borderw=2:bordercolor=0xFDF1F6DD,")
         else:
             cmdstring += (" drawtext=fontfile=" + infoFont + ":text=\'" +
@@ -46,13 +53,13 @@ def createffmpegcmd(filePath, fileType, musicLength, bgvPath, timerColor,
                           "\':x=(w-tw)/2:y=h/19*10:fontsize=34:fontcolor=" +
                           infoColor + ":borderw=2:bordercolor=0xFDF1F6DD,")
     #右下当前日期时间
-    cmdstring += " drawtext=fontfile=" + globalFont + ":text=\'%{localtime}\':x=w*8/11:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
+    cmdstring += " drawtext=fontfile=" + globalFont + ":text=\'%{localtime}\':x=w*10/13:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
     if fileType == 'm4a':  #m4a直接拷贝音频流
         cmdstring += (
-            " -vcodec libx264 -g 50 -b:v 700k -acodec copy -bufsize 1000k -preset ultrafast -f flv \""
+            " -vcodec libx264 -g 50 -b:v 700k -acodec copy -bufsize 2000k -maxrate 1100k -preset ultrafast -f flv \""
             + rtmp + "\"")
     else:
         cmdstring += (
-            " -vcodec libx264 -g 50 -b:v 700k -acodec aac -b:a 256k -bufsize 1000k -preset ultrafast -f flv \""
+            " -vcodec libx264 -g 50 -b:v 700k -acodec aac -b:a 256k -bufsize 2000k -maxrate 1100k -preset ultrafast -f flv \""
             + rtmp + "\"")
     return cmdstring

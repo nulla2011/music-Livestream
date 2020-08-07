@@ -10,21 +10,22 @@ from mutagen.id3 import ID3
 import ffmpegcmd
 import reverseBackslash
 
-conf = configparser.ConfigParser()
+conf = configparser.ConfigParser(interpolation=None)
 try:
     conf.read("music-Livestream.ini")
     rtmp = conf.get('main', 'rtmp_url')
     musicpath = reverseBackslash.reverseB(conf.get('main', 'musicpath'))
     videopath = reverseBackslash.reverseB(conf.get('main', 'videopath'))
     bgvPath = reverseBackslash.reverseB(conf.get('main', 'bgvPath'))
+    enableVideo = int(conf.get('main', 'enableVideo'))
+    aOffset = conf.get('main', 'offset')
     timercolor = conf.get('colors', 'timercolor')
     infocolor = conf.get('colors', 'infocolor')
     globalfont = conf.get('fonts', 'globalfont')
     infofont = conf.get('fonts', 'infofont')
-    enableVideo = int(conf.get('main', 'enableVideo'))
 except Exception:
     print("config file not correct! creating,,,")
-    os.system("rename music-Livestream.ini music-Livestream.ini.bak")
+    os.system("mv music-Livestream.ini music-Livestream.ini.bak")  #for linux
     os.system(
         "cp music-Livestream_example.ini music-Livestream.ini")  #for linux
     sys.exit(0)
@@ -189,12 +190,13 @@ def main(argv):
             title = M.title()
             artist = M.artist()
             #audio only
-            # 2 currentfile, mLength, bgv, 2 color, 2 font, info, output
+            # 2 currentfile, mLength, offset, bgv, 2 color, 2 font, info, output
             try:
-                cmd = ffmpegcmd.createffmpegcmd(currentFilePath, currentFileType,
-                                            musicLength, bgvPath, timercolor,
-                                            infocolor, globalfont, infofont,
-                                            title, artist, rtmp)
+                cmd = ffmpegcmd.createffmpegcmd(currentFilePath,
+                                                currentFileType, musicLength,
+                                                aOffset, bgvPath, timercolor,
+                                                infocolor, globalfont,
+                                                infofont, title, artist, rtmp)
             except Exception:
                 print("command ERROR!")
                 continue
@@ -205,7 +207,7 @@ def main(argv):
             print("type ERROR")
             continue
         print(cmd)
-        fileList.clear()  #清空列表准备下次写入       
+        fileList.clear()  #清空列表准备下次写入
         if not (rtmp.startswith('rtmp')):
             with open("current_command.sh", 'w', encoding='utf-8') as f:
                 f.write(cmd)
