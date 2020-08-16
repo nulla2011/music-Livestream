@@ -14,10 +14,11 @@ def createffmpegcmd(filePath, fileType, musicLength, offset, bgvPath,
         "ffmpeg -y -threads 0 -re -itsoffset 00:00:" + offsetstr + " -i \"" +
         filePath + "\" -ss " + str(startt) + " -i \"" + bgvPath + "\" -t " +
         str(musicLength + int(offset)) +
+        " -i chi.mp4"
         #" -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"
         #播放时间
         #for linux,it is 10 backslashs before %S; for windows, is 5
-        " -vf \"drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3:fontfile="
+        " -vf \"movie=chi.mp4:loop=0,scale=192x108,setpts=N/FRAME_RATE/TB[gif];[0:v][gif]overlay=x=0:y=610,drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3:fontfile="
         + globalFont + ":fontsize=45:fontcolor=" + timerColor +
         ":shadowcolor=0xFDF1F6DD:shadowx=2:shadowy=2,"
         #上方注意
@@ -53,7 +54,8 @@ def createffmpegcmd(filePath, fileType, musicLength, offset, bgvPath,
                           "\':x=(w-tw)/2:y=h/19*10:fontsize=34:fontcolor=" +
                           infoColor + ":borderw=2:bordercolor=0xFDF1F6DD,")
     #右下当前日期时间
-    cmdstring += " drawtext=fontfile=" + globalFont + ":text=\'%{localtime}\':x=w*10/13:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
+    cmdstring += (" drawtext=fontfile=" + globalFont + ":text=\'%{localtime}\':x=w*10/13:y=h*11/12:fontsize=25:fontcolor=white:shadowcolor=0x6821C999:shadowx=2:shadowy=2\""
+    )
     if fileType == 'm4a':  #m4a直接拷贝音频流
         cmdstring += (
             " -vcodec libx264 -g 50 -b:v 700k -acodec copy -bufsize 2000k -maxrate 1100k -preset ultrafast -f flv \""
