@@ -21,8 +21,11 @@ try:
     aOffset = conf.get('main', 'offset')
     timercolor = conf.get('colors', 'timercolor')
     infocolor = conf.get('colors', 'infocolor')
+    timershadow = conf.get('colors', 'timershadow')
+    infoshadow = conf.get('colors', 'infoshadow')
     globalfont = conf.get('fonts', 'globalfont')
     infofont = conf.get('fonts', 'infofont')
+    timerfont = conf.get('fonts', 'timerfont')
 except Exception:
     print("config file not correct! creating,,,")
     os.system("mv music-Livestream.ini music-Livestream.ini.bak")  #for linux
@@ -190,13 +193,14 @@ def main(argv):
             title = M.title()
             artist = M.artist()
             #audio only
-            # 2 currentfile, mLength, offset, bgv, 2 color, 2 font, info, output
+            # 2 currentfile, mLength, offset, bgv, 2 color, 2 shadow, 3 font, info, output
             try:
                 cmd = ffmpegcmd.createffmpegcmd(currentFilePath,
                                                 currentFileType, musicLength,
                                                 aOffset, bgvPath, timercolor,
-                                                infocolor, globalfont,
-                                                infofont, title, artist, rtmp)
+                                                infocolor, timershadow,
+                                                infoshadow, globalfont,
+                                                infofont, timerfont, title, artist, rtmp)
             except Exception:
                 print("command ERROR!")
                 continue
