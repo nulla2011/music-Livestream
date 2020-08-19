@@ -16,12 +16,10 @@ def createffmpegcmd(filePath, fileType, musicLength, offset, bgvPath,
         filePath + "\" -ss " + str(startt) + " -i \"" + bgvPath + "\" -t " +
         str(musicLength + int(offset)) +
         #" -vf \"colorlevels=rimin=0.2:gimin=0.2:bimin=0.2:romax=0.9:gomax=0.9:bomax=0.9,vignette,"   
-        " -vf \"movie=chi.mp4:loop=" +
-        "0" +
-        ",scale=192x108,setpts=N/FRAME_RATE/TB[gif];[0:v][gif]overlay=x=0:y=615:shortest=1:eof_action=pass,"
+        " -vf \"movie=chi.mp4:loop=0,scale=192x108,setpts=N/FRAME_RATE/TB[gif];[0:v][gif]overlay=x=0:y=615:shortest=1:eof_action=pass,"
         #播放时间 
         # #for linux,it is 10 backslashs before %S; for windows, is 5
-        "drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3:fontfile="
+        "drawtext=text=\'%{pts\\:gmtime\\:0\\:%M\\\\\\\\\\:%S}\':r=30:x=(w-tw)/2:y=h/4*3-th+h/16:fontfile="
         + timerFont + ":fontsize=45:fontcolor=" + timerColor +
         ":shadowcolor=" + timerShadow + ":shadowx=2:shadowy=2,"
         #上方注意

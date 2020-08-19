@@ -3,3 +3,4 @@ __pycache__/
 bash.exe.stackdump
 *.mp4
 music-Livestream.ini.bak
+*.log

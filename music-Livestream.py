@@ -2,6 +2,7 @@
 import os
 import sys
 import random
+import time
 import configparser
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
@@ -160,7 +161,9 @@ def main(argv):
                     if enableVideo: getVideoFile(videopath)
                     resultList = []
                     for f in fileList:
-                        if (f[0].find(argv[2]) != -1):
+                        fullname = os.path.split(f)[1]
+                        fname = os.path.splitext(fullname)[0]
+                        if (fname.find(argv[2]) != -1):
                             resultList.append(f)
                     if len(resultList) == 0:
                         print("not fond!")
@@ -192,21 +195,20 @@ def main(argv):
                 continue
             title = M.title()
             artist = M.artist()
-            #audio only
+            # audio only
             # 2 currentfile, mLength, offset, bgv, 2 color, 2 shadow, 3 font, info, output
             try:
-                cmd = ffmpegcmd.createffmpegcmd(currentFilePath,
-                                                currentFileType, musicLength,
-                                                aOffset, bgvPath, timercolor,
-                                                infocolor, timershadow,
-                                                infoshadow, globalfont,
-                                                infofont, timerfont, title, artist, rtmp)
+                cmd = ffmpegcmd.createffmpegcmd(
+                    currentFilePath, currentFileType, musicLength, aOffset,
+                    bgvPath, timercolor, infocolor, timershadow, infoshadow,
+                    globalfont, infofont, timerfont, title, artist, rtmp)
             except Exception:
                 print("command ERROR!")
                 continue
         elif ftype(currentFileType) == 2:  #flv/MP4视频直接推，没什么好说的
-            cmd = ("ffmpeg -y -threads 0 -re -i \"" + currentFilePath +
-                   "\" -codec copy -bufsize 1000k -f flv \"" + rtmp + "\"")
+            cmd = (
+                f"ffmpeg -y -threads 0 -re -i \"{currentFilePath}\" -codec copy -bufsize 1000k -f flv \"{rtmp}\""
+            )
         else:
             print("type ERROR")
             continue
@@ -215,6 +217,15 @@ def main(argv):
         if not (rtmp.startswith('rtmp')):
             with open("current_command.sh", 'w', encoding='utf-8') as f:
                 f.write(cmd)
+        with open("player.log", 'a+', encoding='utf-8') as l:
+            timeStr = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            filename = os.path.split(currentFilePath)[1]
+            if ftype(currentFileType) == 1:
+                l.write(
+                    f"[{timeStr}] [PLAY] {title} - {artist} (name:{filename})\n"
+                )
+            elif ftype(currentFileType) == 2:
+                l.write(f"[{timeStr}] [PLAY] {filename}\n")
         try:
             os.system(cmd)
         except Exception:
