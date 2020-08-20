@@ -9,7 +9,8 @@ To use it in windows, please change the commands in os.system()
 
 ## Initialize
 
-Rename music-Livestream_example.ini to music-Livestream.ini and write settings.
+- install FFmpeg and add to PATH
+- Rename music-Livestream_example.ini to music-Livestream.ini and write settings.
 
 ## Use
 

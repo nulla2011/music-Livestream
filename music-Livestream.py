@@ -206,9 +206,7 @@ def main(argv):
                 print("command ERROR!")
                 continue
         elif ftype(currentFileType) == 2:  #flv/MP4视频直接推，没什么好说的
-            cmd = (
-                f"ffmpeg -y -threads 0 -re -i \"{currentFilePath}\" -codec copy -bufsize 1000k -f flv \"{rtmp}\""
-            )
+            cmd = f"ffmpeg -y -threads 0 -re -i \"{currentFilePath}\" -codec copy -bufsize 1000k -f flv \"{rtmp}\""
         else:
             print("type ERROR")
             continue
