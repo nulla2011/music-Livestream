@@ -6,7 +6,7 @@ import math
 def createffmpegcmd(filePath, fileType, musicLength, offset, bgvPath,
                     timerColor, infoColor, timerShadow, infoShadow, globalFont,
                     infoFont, timerFont, title, artist, rtmp):
-    startt = random.randint(0, 8 * 60 - int(musicLength))
+    startt = random.randint(0, 7 * 60 + 30 - int(musicLength))
     if int(offset) < 10:
         offsetstr = '0' + offset
     else:

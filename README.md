@@ -1,9 +1,11 @@
-# Randomly stream your music from your library.
+# music-Livestream
+
+**Randomly stream your music from your library.**
 
 ------
 
 
-To use it in windows,please change the commands in os.system()
+To use it in windows, please change the commands in os.system()
 
 ## Initialize
 
